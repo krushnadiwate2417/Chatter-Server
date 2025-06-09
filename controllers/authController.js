@@ -9,7 +9,7 @@ router.post("/signup",async (req,res)=>{
 
         const user = await User.findOne({email : req.body.email});
         if(user){
-            return res.send({
+            return res.status(400).send({
                 message : "User already Exist, Try logging in ! ",
                 success : false,
             })
@@ -40,7 +40,8 @@ router.post("/signup",async (req,res)=>{
 //Log in 
 router.post("/login",async(req,res)=>{
     try {
-        const user = await User.findOne({email : req.body.email});
+        const user = await User.findOne({email : req.body.email}).select({password : true});
+        const sendUser = await User.findOne({email : req.body.email});
         if(!user){
             return res.status(400).send({
                 message : "No user Exist, Try Signing up/Create ",
@@ -64,7 +65,7 @@ router.post("/login",async(req,res)=>{
                 message : "User found",
                 success : true,
                 token : token,
-                data : user
+                data : sendUser
             })
         }
     } catch (error) {
