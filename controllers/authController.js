@@ -44,7 +44,7 @@ router.post("/login",async(req,res)=>{
         const sendUser = await User.findOne({email : req.body.email});
         if(!user){
             return res.status(400).send({
-                message : "No user Exist, Try Signing up/Create ",
+                message : "No user Exist, Try Signing up / Create new User",
                 success : false,
             })
         }
@@ -52,7 +52,7 @@ router.post("/login",async(req,res)=>{
         const comapringPass =await bcrypt.compare(req.body.password,user.password);
         if(!comapringPass){
             return res.status(400).send({
-                message : "Wrong Password, Try Correct",
+                message : "Wrong Password, Try Correct Password",
                 success : false,
             })
         }
@@ -62,7 +62,7 @@ router.post("/login",async(req,res)=>{
             const token = jwt.sign({userId : user._id},process.env.JSON_SECRET_KEY,{expiresIn: "1d"})
 
             res.status(200).send({
-                message : "User found",
+                message : "Login Successful",
                 success : true,
                 token : token,
                 data : sendUser
