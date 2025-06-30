@@ -8,6 +8,13 @@ const cors = require('cors');
 const app = express();
 const allowedOrigins = ['http://localhost:5173'];
 
+const server = require('http').createServer(app);
+const io = require('socket.io')(server,{
+    cors : {
+        origin : 'http://localhost:5173',
+        methods : ['GET','POST','PATCH','DELETE']
+    }
+})
 app.use(cors({
     origin : function (origin,callback){
         if(!origin || allowedOrigins.includes(origin)){
@@ -26,4 +33,16 @@ app.use("/api/v1/chat",chatRouter);
 app.use("/api/v1/message",messageRouter);
 
 
-module.exports = app;
+//Testing COnnection
+io.on('connection',socket => {
+    socket.on('join-room',userId=>{
+        socket.join(userId);
+        console.log(`user id  : ${userId}`)
+    })
+
+    socket.on('send-message',(data)=>{
+        socket.to(data.recipient).emit('recieve-msg',data.text);
+    })
+})
+
+module.exports = server;
