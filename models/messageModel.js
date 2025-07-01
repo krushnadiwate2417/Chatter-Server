@@ -9,7 +9,11 @@ const messageSchema = new mongoose.Schema({
     },
     text : {
         type : String,
-        required : true
+        required : false
+    },
+    img : {
+        type : String,
+        required : false
     },
     read : {
         type : Boolean,

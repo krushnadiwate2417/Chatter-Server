@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const router = require('express').Router();
+const cloudinary = require("./../cloudinary");
 
 router.get("/getLoggedUser",authMiddleware,async(req,res)=>{
     try {
@@ -29,6 +30,40 @@ router.get("/getAllUsers",authMiddleware,async(req,res)=>{
                 users
             })
         }
+
+    } catch (error) {
+        res.status(400).send({
+            message : error.message,
+            success : false
+        })
+    }
+})
+
+router.post("/uploadProfilePic",authMiddleware, async (req,res)=>{
+    try {
+        const {image} = req.body;
+        const {userId} = req.user;
+
+        //1 Upload Profile Pic to Cloudinary
+
+        const cloudImgUrl = await cloudinary.uploader.upload(image,{
+            asset_folder: 'chatter',
+            public_id: `profile_${Date.now()}`
+        })
+
+
+        //2. Save imgUrl to MongoDB 
+        const user = await User.findOne({_id : userId});
+
+        user.profilePic = cloudImgUrl.secure_url;
+        await user.save();
+
+        res.status(201).send({
+            success : true,
+            message : "Profile Image Uploaded Successfully ! ",
+            data : user
+        })
+
 
     } catch (error) {
         res.status(400).send({
