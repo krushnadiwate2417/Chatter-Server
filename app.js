@@ -40,8 +40,11 @@ io.on('connection',socket => {
         console.log(`user id  : ${userId}`)
     })
 
-    socket.on('send-message',(data)=>{
-        socket.to(data.recipient).emit('recieve-msg',data.text);
+    socket.on('send-message',(message)=>{
+        io
+        .to(message.members[0])
+        .to(message.members[1])
+        .emit('recieve-message',message);
     })
 })
 
