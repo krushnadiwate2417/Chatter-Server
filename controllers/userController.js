@@ -2,6 +2,7 @@ const User = require("../models/userModel");
 const authMiddleware = require("../middlewares/authMiddleware");
 const router = require('express').Router();
 const cloudinary = require("./../cloudinary");
+const bcrypt = require("bcryptjs");
 
 router.get("/getLoggedUser",authMiddleware,async(req,res)=>{
     try {
@@ -72,5 +73,31 @@ router.post("/uploadProfilePic",authMiddleware, async (req,res)=>{
         })
     }
 })
+
+//change password
+router.patch("/changePassword",authMiddleware,async (req,res)=>{
+    //1.Compare user's old password
+    const user = await User.findOne({_id : req.user.userId}).select("+password");
+    
+    const oldPasswordCorrect = await bcrypt.compare(req.body.oldPassword,user.password);
+
+    if(!oldPasswordCorrect){
+        return res.status(400).send({
+            success : false,
+            message : "Wrong Old Password"
+        })
+    };
+
+    const newPassword = await bcrypt.hash(req.body.newPassword,10);
+    user.password = newPassword;
+    await user.save();
+
+    res.status(201).send({
+        success : true,
+        message : "Password Changes Successfully!"
+    })
+
+})
+
 
 module.exports = router;
